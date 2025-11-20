@@ -11,6 +11,7 @@ export async function uploadResume(req: Request, res: Response) {
     const file = req.file;
     const filePath = file.path;
     const text = (await extractTextFromFile(file.path));
+    //@ts-ignore
     await ingestDocument(text, "resume");
     // remove uploaded file
     fs.unlinkSync(filePath);
@@ -29,8 +30,10 @@ export async function uploadJD(req: Request, res: Response) {
     const file = req.file;
     const filePath = file.path;
     const text = await extractTextFromFile(filePath);
+    //@ts-ignore
     await ingestDocument(text, "jd");
     fs.unlinkSync(filePath);
+    //@ts-ignore
     return res.json({ ok: true, message: "Job description ingested", textLength: text.length });
   } catch (err: any) {
     console.error(err);
