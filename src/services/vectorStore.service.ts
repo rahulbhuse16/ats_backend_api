@@ -9,6 +9,7 @@ let store: VectorItem[] = [];
 // load at startup
 function load() {
   const data = readJSON(config.vectorPath);
+  console.log("data",data,config.vectorPath)
   if (data && Array.isArray(data)) store = data;
 }
 function persist() {
