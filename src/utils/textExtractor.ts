@@ -12,33 +12,65 @@ export const extractTextFromFile = async (filePath: string) => {
   
 };
 
+// ----------------------------
+// 1. Skills Dictionary
+// ----------------------------
+export const SKILLS_DICTIONARY: string[] = [
+  "javascript", "typescript", "react", "react native", "node", "node.js", "express",
+  "java", "python", "c++", "c#", "php", "golang", "html", "css", "tailwind",
+  "mongodb", "mysql", "postgresql", "oracle", "firebase",
+  "aws", "azure", "gcp", "docker", "kubernetes", "git", "github", "jira",
+  "machine learning", "deep learning", "data science",
+  "agile", "scrum", "communication", "leadership", "problem solving"
+];
+
+
+// ----------------------------
+// 2. Extract ONLY Skills
+// ----------------------------
 export function extractKeywords(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9+ ]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
+  const cleaned = text.toLowerCase().replace(/[^a-z0-9+ ]/g, " ");
+
+  const found = new Set<string>();
+
+  // match multi-word + single-word skills
+  for (const skill of SKILLS_DICTIONARY) {
+    const formattedSkill = skill.toLowerCase().replace(/\+/g, "\\+");
+    const regex = new RegExp(`\\b${formattedSkill}\\b`, "i");
+
+    if (regex.test(cleaned)) {
+      found.add(skill);
+    }
+  }
+
+  return Array.from(found);
 }
 
-export function compareResumeAndJD(resumeText: string, jdText: string) {
-  const resumeWords = extractKeywords(resumeText);
-  const jdWords = extractKeywords(jdText);
 
-  const resumeSet = new Set(resumeWords);
-  const jdSet = new Set(jdWords);
+// ----------------------------
+// 3. Compare Only Skills
+// ----------------------------
+export function compareResumeAndJD(resumeText: string, jdText: string) {
+  const resumeSkills = extractKeywords(resumeText);
+  const jdSkills = extractKeywords(jdText);
+
+  const resumeSet = new Set(resumeSkills);
+  const jdSet = new Set(jdSkills);
 
   const strengths: string[] = [];
   const gaps: string[] = [];
 
-  jdSet.forEach((word) => {
-    if (resumeSet.has(word)) strengths.push(word);
-    else gaps.push(word);
+  jdSet.forEach((skill) => {
+    if (resumeSet.has(skill)) strengths.push(skill);
+    else gaps.push(skill);
   });
 
-  const matchScore =
-    Math.round((strengths.length / (strengths.length + gaps.length)) * 100);
+  const matchScore = jdSet.size
+    ? Math.round((strengths.length / jdSet.size) * 100)
+    : 0;
 
   return { matchScore, strengths, gaps };
 }
+
 
 
